@@ -28,9 +28,22 @@ public class AVLTreeTest {
         array = Arrays.asList(array).stream().distinct().collect(Collectors.toList()).toArray(new Integer[] {});
         for(int a: array) {
             bt.insert(a, a);
-            System.out.println();
-            System.out.println(bt);
-            
+            System.out.println("\n" + bt);
         }
+        
+        bt.remove(19);
+        System.out.println("\n" + bt);
+        
+        bt.remove(13);
+        System.out.println("\n" + bt);
+        
+        bt.remove(21);
+        System.out.println("\n" + bt);
+        
+        bt.remove(20);
+        System.out.println("\n" + bt);
+        
+        bt.remove(0);
+        System.out.println("\n" + bt);
 	}
 }

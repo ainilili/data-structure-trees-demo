@@ -20,7 +20,31 @@ public class AVLTree extends BinarySortTree{
 
     @Override
     public Node remove(int index) {
-        return super.remove(index);
+        Node node = super.get(index);
+        if(node == null) {
+            return null;
+        }
+        if(node.left == null && node.right == null) {
+            super.remove(index);
+            rebalance((ANode)node);
+        }else {
+            if(node.left == null) {
+                super.remove(index);
+                rebalance((ANode)node);
+            }else {
+                Node n = node.left;
+                while(n.right != null) {
+                    n = n.right;
+                }
+                super.remove(n.index);
+                node.index = n.index;
+                node.value = n.value;
+                n.index = index;
+                
+                rebalance((ANode)n);
+            }
+        }
+        return node;
     }
 
     @Override

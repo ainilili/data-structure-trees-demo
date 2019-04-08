@@ -105,7 +105,7 @@ public class BinarySortTreeTest {
 		bt.remove(16);
 		System.out.println(bt);
 		
-		bt.remove(8);
+		bt.remove(12);
 		System.out.println(bt);
 
 	}
