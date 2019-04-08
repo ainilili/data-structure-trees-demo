@@ -32,7 +32,59 @@ public class RedBlackTree extends BinarySortTree{
 
     @Override
     public Node remove(int index) {
-        return super.remove(index);
+        Node node = super.get(index);
+        if(node == null) {
+            return null;
+        }
+        if(node.left == null && node.right == null) {
+            super.remove(index);
+        }else {
+            if(node.left == null) {
+                super.remove(index);
+                rebalance((RNode)node.right);
+            }else {
+                Node n = node.left;
+                while(n.right != null) {
+                    n = n.right;
+                }
+                super.remove(n.index);
+                node.index = n.index;
+                node.value = n.value;
+                
+                RNode rn = rnode(n);
+                rebalanceDelete(rn);
+            }
+        }
+        return node;
+    }
+    
+    private void rebalanceDelete(RNode rn) {
+        if(! rn.isRed) {
+            if(rn.parent != null) {
+                RNode s = rn.isLeft ? rnode(rn.parent.right) : rnode(rn.parent.left);
+                if(rnode(rn.parent).isRed) {
+                    if(s == null) {
+                        rnode(rn.parent).isRed = false;
+                    }else{
+                        rnode(rn.parent).isRed = false;
+                        s.isRed = true;
+                        if(s.left != null && s.right != null) {
+                            rnode(s.right).isRed = false;
+                            s.isRed = true;
+                            rnode(rn.parent).isRed = false;
+                            leftRotate(rn.parent);
+                        }else if(s.left == null && s.right != null) {
+                            s.isRed = true;
+                            rnode(s.right).isRed = false;
+                            rnode(rn.parent).isRed = false;
+                            leftRotate(rn.parent);
+                        }else if(s.left != null && s.right == null) {
+                            
+                        }
+                    }
+                }
+            }
+        }
     }
 
     @Override

@@ -39,7 +39,6 @@ public class AVLTree extends BinarySortTree{
                 super.remove(n.index);
                 node.index = n.index;
                 node.value = n.value;
-                n.index = index;
                 
                 rebalance((ANode)n);
             }
@@ -91,7 +90,7 @@ public class AVLTree extends BinarySortTree{
             }
         }
     }
-
+    
     protected void leftRotate(Node node) {
         Node center = node.right;
 

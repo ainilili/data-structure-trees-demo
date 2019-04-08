@@ -1,6 +1,7 @@
 package org.smallnico.datastructure.tree.test;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.stream.Collectors;
 
 import org.junit.Test;
@@ -26,12 +27,27 @@ public class RedBlackTreeTest {
         RedBlackTree bt = new RedBlackTree();
         Integer[] array = new Integer[] {29,8,19,26,0,9,9,25,3,3,19,21,10,20,14,20,0,1,3,3,16,9,9,11,13,25,4,25,17};
 //        Integer[] array = new Integer[] {1,2,3,4,5,6,7,8,9,10};
-//        array = Arrays.asList(array).stream().distinct().collect(Collectors.toList()).toArray(new Integer[] {});
+        array = Arrays.asList(array).stream().distinct().collect(Collectors.toList()).toArray(new Integer[] {});
         for(int a: array) {
             bt.insert(a, a);
             System.out.println("\n>>>>>>>>> 插入：" + a);
             System.out.println(bt.toString(true));
-            
         }
+        
+        bt.remove(19);
+        System.out.println("\n" + bt);
+        
+        bt.remove(13);
+        System.out.println("\n" + bt);
+        
+        bt.remove(21);
+        System.out.println("\n" + bt);
+        
+        bt.remove(20);
+        System.out.println("\n" + bt);
+        
+        bt.remove(0);
+        System.out.println("\n" + bt);
+        
 	}
 }
