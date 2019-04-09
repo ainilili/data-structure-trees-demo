@@ -31,19 +31,10 @@ public class AVLTreeTest {
             System.out.println("\n" + bt);
         }
         
-        bt.remove(19);
+        bt.remove(9);
         System.out.println("\n" + bt);
         
-        bt.remove(13);
-        System.out.println("\n" + bt);
-        
-        bt.remove(21);
-        System.out.println("\n" + bt);
-        
-        bt.remove(20);
-        System.out.println("\n" + bt);
-        
-        bt.remove(0);
+        bt.remove(10);
         System.out.println("\n" + bt);
 	}
 }

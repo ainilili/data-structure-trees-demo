@@ -31,23 +31,23 @@ public class RedBlackTreeTest {
         for(int a: array) {
             bt.insert(a, a);
             System.out.println("\n>>>>>>>>> 插入：" + a);
-            System.out.println(bt.toString(true));
+            System.out.println(bt);
+            System.out.println("\n" + bt.toString(true));
         }
         
-        bt.remove(19);
-        System.out.println("\n" + bt);
-        
-        bt.remove(13);
-        System.out.println("\n" + bt);
-        
-        bt.remove(21);
-        System.out.println("\n" + bt);
-        
-        bt.remove(20);
-        System.out.println("\n" + bt);
-        
-        bt.remove(0);
-        System.out.println("\n" + bt);
+        delete(19, bt);
+        delete(13, bt);
+        delete(21, bt);
+        delete(20, bt);
+        delete(0, bt);
+        delete(25, bt);
         
 	}
+    
+    static void delete(int index, RedBlackTree bt) {
+        bt.remove(index);
+        System.out.println("\n >>>>>>>>>>>>>>>> 删除：" + index);
+        System.out.println("\n" + bt);
+        System.out.println("\n" + bt.toString(true));
+    }
 }

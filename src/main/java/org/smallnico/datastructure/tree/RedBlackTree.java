@@ -32,57 +32,89 @@ public class RedBlackTree extends BinarySortTree{
 
     @Override
     public Node remove(int index) {
+        if(index == 0) {
+            System.out.println(1);
+        }
+
         Node node = super.get(index);
         if(node == null) {
             return null;
         }
-        if(node.left == null && node.right == null) {
-            super.remove(index);
-        }else {
-            if(node.left == null) {
-                super.remove(index);
-                rebalance((RNode)node.right);
-            }else {
-                Node n = node.left;
+        Node temp = node;
+        while(temp.left != null || temp.right != null) {
+            if(temp.left != null) {
+                Node n = temp.left;
                 while(n.right != null) {
                     n = n.right;
                 }
-                super.remove(n.index);
-                node.index = n.index;
-                node.value = n.value;
-                
-                RNode rn = rnode(n);
-                rebalanceDelete(rn);
+                temp.index = n.index;
+                temp.value = n.value;
+                temp = n;    
+            }else {
+                Node n = temp.right;
+                temp.index = n.index;
+                temp.value = n.value;
+                temp = n;  
             }
         }
+        //边缘叶子结点
+        RNode rn = rnode(temp);
+        super.remove(rn);
+        rebalanceDelete(rn);
         return node;
     }
-    
+
     private void rebalanceDelete(RNode rn) {
-        if(! rn.isRed) {
-            if(rn.parent != null) {
-                RNode s = rn.isLeft ? rnode(rn.parent.right) : rnode(rn.parent.left);
-                if(rnode(rn.parent).isRed) {
-                    if(s == null) {
-                        rnode(rn.parent).isRed = false;
-                    }else{
-                        rnode(rn.parent).isRed = false;
-                        s.isRed = true;
-                        if(s.left != null && s.right != null) {
-                            rnode(s.right).isRed = false;
-                            s.isRed = true;
-                            rnode(rn.parent).isRed = false;
-                            leftRotate(rn.parent);
-                        }else if(s.left == null && s.right != null) {
-                            s.isRed = true;
-                            rnode(s.right).isRed = false;
-                            rnode(rn.parent).isRed = false;
-                            leftRotate(rn.parent);
-                        }else if(s.left != null && s.right == null) {
-                            
-                        }
+        if(rn.isRoot()) {
+            return;
+        }
+        if(rn.isRed) return;
+
+        //以下为被删除结点为黑的场景
+
+        RNode p = rnode(rn.parent);
+        RNode s = rn.isLeft ? rnode(p.right) : rnode(p.left);
+
+        if(rn.isLeft) {
+            if(p.isRed) {
+                if(s.right == null && s.left == null) {
+                    //TODO 兄弟结点没有子结点
+                }else if(s.right == null && s.left != null) {
+                    rightRotate(s);
+                    p.isRed = false;
+                    leftRotate(p);
+                }else {
+                    s.isRed = true;
+                    p.isRed = false;
+                    rnode(s.right).isRed = false;
+                    leftRotate(p);
+                }
+            }else {
+                if(! s.isRed) {
+                    s.isRed = false;
+                    p.isRed = true;
+                    if(s.right != null) {
+                        rnode(s.right).isRed = false;
+                    }
+                    leftRotate(p);
+                }else {
+                    if(s.left != null && s.right != null) {
+                        s.isRed = false;
+                        p.isRed = true;
+                        leftRotate(p);
+                    }else if(s.left == null && s.right != null) {
+                        s.isRed = false;
+                        leftRotate(p);
+                    }else {
+                        s.isRed = false;
+                        rightRotate(s);
+                        leftRotate(p);
                     }
                 }
+            }
+        }else {
+            if(p.isRed) {
+                p.isRed = false;
             }
         }
     }
@@ -260,7 +292,7 @@ public class RedBlackTree extends BinarySortTree{
     public RNode rnode(Node node) {
         return (RNode) node;
     }
-    
+
     public String toString(boolean colorOnly) {
         //保存树形
         StringBuilder builder = new StringBuilder();
@@ -269,7 +301,7 @@ public class RedBlackTree extends BinarySortTree{
         //使用栈对树做层序遍历
         Queue<Node> queue = new LinkedBlockingQueue<Node>();
         queue.add(root);
-        
+
         int depth = 0; //临时深度
         int maxDepth = getMaxDepth(); //最大深度
         while(! queue.isEmpty()) {
@@ -315,7 +347,7 @@ public class RedBlackTree extends BinarySortTree{
         }
         return builder.toString();
     }
-    
+
     protected String colorWrapper(int o, boolean isRed, boolean onlyColor) {
         if(onlyColor) {
             return isRed ? "○" : "●";
@@ -369,5 +401,5 @@ public class RedBlackTree extends BinarySortTree{
         }
         return String.valueOf(o);
     }
-        
+
 }

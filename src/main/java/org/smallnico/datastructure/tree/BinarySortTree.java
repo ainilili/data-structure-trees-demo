@@ -22,42 +22,46 @@ public class BinarySortTree extends AbstractBinaryTree{
 	public Node remove(int index) {
 		//首先寻找该结点
 		Node target = find(index, root);
-		if(target == null) {
-			//该结点为空则直接返回null
-			return null;
-		}else {
-			//优先考虑将被移除结点的左结点连接到右结点的左分支
-			Node n = target.right != null ? target.right : target.left;
-			
-			if(target.left != null && target.right != null) {
-				Node leftLoopStarter = n;
-				//寻找目标结点的右结点下的最左结点
-				while(leftLoopStarter.left != null) {
-					leftLoopStarter = leftLoopStarter.left;
-				}
-				leftLoopStarter.setLeft(target.left);
-			}
-			
-			if(target.parent == null) {
-				//只剩下root结点不允许删除
-				if(target.left == null && target.right == null) {
-					throw new RuntimeException("再删就没了！");
-				}else {
-					//当删除root结点时，优先考虑将它的右结点作为新的root结点
-					root = n;
-					n.parent = null;
-				}
-			}else {
-				//移除响应的结点
-				if(target.isLeft) {
-					target.parent.setLeft(n);
-				}else {
-					target.parent.setRight(n);
-				}
-			}
-			size --;
-			return target;
-		}
+		return remove(target);
+	}
+	
+	protected Node remove(Node target) {
+	    if(target == null) {
+            //该结点为空则直接返回null
+            return null;
+        }else {
+            //优先考虑将被移除结点的左结点连接到右结点的左分支
+            Node n = target.right != null ? target.right : target.left;
+            
+            if(target.left != null && target.right != null) {
+                Node leftLoopStarter = n;
+                //寻找目标结点的右结点下的最左结点
+                while(leftLoopStarter.left != null) {
+                    leftLoopStarter = leftLoopStarter.left;
+                }
+                leftLoopStarter.setLeft(target.left);
+            }
+            
+            if(target.parent == null) {
+                //只剩下root结点不允许删除
+                if(target.left == null && target.right == null) {
+                    throw new RuntimeException("再删就没了！");
+                }else {
+                    //当删除root结点时，优先考虑将它的右结点作为新的root结点
+                    root = n;
+                    n.parent = null;
+                }
+            }else {
+                //移除响应的结点
+                if(target.isLeft) {
+                    target.parent.setLeft(n);
+                }else {
+                    target.parent.setRight(n);
+                }
+            }
+            size --;
+            return target;
+        }
 	}
 
 	@Override
