@@ -210,63 +210,6 @@ public class RedBlackTree extends BinarySortTree{
         }
     }
 
-    protected void leftRotate(Node node) {
-        Node center = node.right;
-
-        center.parent = node.parent;
-        if(center.parent == null) {
-            this.root = center;
-        }else {
-            if(node.isLeft) {
-                node.parent.left = center;    
-            }else {
-                node.parent.right = center;
-            }
-            center.isLeft = node.isLeft;
-        }
-
-        node.right = null;
-        node.isLeft = true;
-
-        Node leftMost = center.left;
-
-        if(leftMost != null) {
-            leftMost.parent = node;
-            node.right = leftMost;
-            leftMost.isLeft = false;
-        }
-        center.left = node;
-        node.parent = center;
-    }
-
-    protected void rightRotate(Node node) {
-        Node center = node.left;
-
-        center.parent = node.parent;
-        if(center.parent == null) {
-            this.root = center;
-        }else {
-            if(node.isLeft) {
-                node.parent.left = center;    
-            }else {
-                node.parent.right = center;
-            }
-            center.isLeft = node.isLeft;
-        }
-
-        node.left = null;
-        node.isLeft = false;
-
-        Node rightMost = center.right;
-        if(rightMost != null) {
-            rightMost.parent = node;
-            node.left = rightMost;
-            rightMost.isLeft = true;
-        }
-        center.right = node;
-        node.parent = center;
-    }
-
     class RNode extends Node{
 
         private boolean isRed = true;
