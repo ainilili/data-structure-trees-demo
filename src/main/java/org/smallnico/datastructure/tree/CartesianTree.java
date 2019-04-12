@@ -12,6 +12,7 @@ public class CartesianTree extends BinarySortTree{
         }else {
             Node n = new Node(index, value, cur);
             cur.right = n;
+            n.isLeft = false;
             if(index < cur.index) {
                 leftRotate(cur);
                 while(n.parent != null && n.parent.index > n.index) {

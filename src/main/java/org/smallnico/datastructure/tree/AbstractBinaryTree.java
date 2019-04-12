@@ -10,7 +10,7 @@ public abstract class AbstractBinaryTree {
 
     public abstract int size();
 
-    protected class Node{
+    public static  class Node{
 
         //左叶子结点
         protected Node left;
@@ -25,7 +25,7 @@ public abstract class AbstractBinaryTree {
         protected int index;
 
         //内容
-        protected Object value;
+        public Object value;
 
         //该值为true意味着这个结点坐落于左边
         protected boolean isLeft;
