@@ -14,14 +14,52 @@ public class BTree<V> {
 		this.limit = limit;
 	}
 	
-	public BEntry<V> insert(int index, V value){
+	public V put(int index, V value){
 		if(root == null) {
 			BEntry<V> inserted = new BEntry<V>(index, value, null);
 			root = new BNode<V>(limit, null, inserted);
-			return inserted;
 		}else {
-			return insertEntry(root, new BEntry<V>(index, value, root));
+		    insertEntry(root, new BEntry<V>(index, value, root));
 		}
+		return value;
+	}
+	
+	public V search(int index){
+	    BEntry<V> result = search(root, index);
+	    return result != null ? result.value : null;
+	}
+	
+	public V remove(int index) {
+	    BEntry<V> target = search(root, index);
+	    if(target == null) return null;
+	    
+	    if(target.left == null && target.right == null) {
+	        target.group.entries.remove(target);
+	        if(target.group.isBlank()) {
+	        }
+	    }
+	    
+	    
+	    removeEntryAdjust(target);
+	    return target.value;
+	}
+	
+	public void removeEntryAdjust(BEntry<V> target) {
+	    
+	}
+	
+	protected BEntry<V> search(BNode<V> node, int index) {
+	    if(node == null) return null;
+	    BEntry<V> result = node.find(index);
+        if(result == null) {
+            int pos = node.indexOf(index) + 1;
+            if(pos < node.entries.size()) {
+                return search(node.entries.get(pos).left, index);
+            }else {
+                return search(node.entries.get(pos - 1).right, index);
+            }
+        }
+        return result;
 	}
 	
 	protected BEntry<V> insertEntry(BNode<V> node, BEntry<V> inserted){
@@ -52,14 +90,14 @@ public class BTree<V> {
 	protected void insertEntryAdjust(BNode<V> node){
 		if(node.needAdjust()) {
 			SplitEntity<V> splitEntity = split(node);
-			if(node.parent == null) {
+			if(node.parentNode == null) {
 				BNode<V> newParent = new BNode<V>(node.limit, null, splitEntity.mid);
 				root = newParent;
-				splitEntity.left.parent = newParent;
-				splitEntity.right.parent = newParent;
+				splitEntity.left.parentNode = newParent;
+				splitEntity.right.parentNode = newParent;
 			}else {
-				addToEnties(node.parent, splitEntity.mid);
-				insertEntryAdjust(node.parent);
+				addToEnties(node.parentNode, splitEntity.mid);
+				insertEntryAdjust(node.parentNode);
 			}
 		}
 	}
@@ -99,16 +137,16 @@ public class BTree<V> {
 		
 		BEntry<V> middle = entries.get(splitIndex);
 		
-		splitEntity.left = new BNode<V>(node.limit, node.parent);
-		splitEntity.right = new BNode<V>(node.limit, node.parent);
+		splitEntity.left = new BNode<V>(node.limit, node.parentNode);
+		splitEntity.right = new BNode<V>(node.limit, node.parentNode);
 		
 		for(int index = 0; index < entries.size(); index ++) {
 			BEntry<V> entry = entries.get(index);
 			if(index < splitIndex) {
 				if(entry.left != null) 
-					entry.left.parent = splitEntity.left;
+					entry.left.parentNode = splitEntity.left;
 				if(entry.right != null) 
-					entry.right.parent = splitEntity.left;
+					entry.right.parentNode = splitEntity.left;
 				entryList.add(entry);
 			}else if(index == splitIndex) {
 				splitEntity.left.entries = entryList;
@@ -116,9 +154,9 @@ public class BTree<V> {
 				entryList = new LinkedList<BEntry<V>>();
 			}else {
 				if(entry.left != null) 
-					entry.left.parent = splitEntity.right;
+					entry.left.parentNode = splitEntity.right;
 				if(entry.right != null) 
-					entry.right.parent = splitEntity.right;
+					entry.right.parentNode = splitEntity.right;
 				entryList.add(entry);
 				splitEntity.right.entries = entryList;
 			}
@@ -162,7 +200,10 @@ public class BTree<V> {
 	
 	public static class BNode<V> {
 		int limit;
-		BNode<V> parent;
+		BNode<V> parentNode;
+		BEntry<V> parentEntryLeft;
+		BEntry<V> parentEntryRight;
+		
 		LinkedList<BEntry<V>> entries;
 		
 		public BNode(int limit, BNode<V> parent, BEntry<V> entry) {
@@ -174,9 +215,9 @@ public class BTree<V> {
 			this(limit, parent, new LinkedList<BEntry<V>>());
 		}
 		
-		public BNode(int limit, BNode<V> parent, LinkedList<BEntry<V>> entries) {
+		public BNode(int limit, BNode<V> parentNode, LinkedList<BEntry<V>> entries) {
 			this.limit = limit;
-			this.parent = parent;
+			this.parentNode = parentNode;
 			this.entries = entries;
 		}
 		
@@ -186,6 +227,10 @@ public class BTree<V> {
 
 		public int capacity() {
 			return entries.size();
+		}
+		
+		public boolean isBlank() {
+		    return capacity() == 0;
 		}
 		
 		public int indexOf(int index) {
@@ -207,9 +252,9 @@ public class BTree<V> {
 		public int height() {
 			int height = 0;
 			BNode<V> cur = this;
-			while(cur.parent != null) {
+			while(cur.parentNode != null) {
 				height ++;
-				cur = cur.parent;
+				cur = cur.parentNode;
 			}
 			return height;
 		}
@@ -261,8 +306,30 @@ public class BTree<V> {
 		public String toString() {
 			return String.valueOf(value);
 		}
-		
-		
 
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + ((index == null) ? 0 : index.hashCode());
+            return result;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj)
+                return true;
+            if (obj == null)
+                return false;
+            if (getClass() != obj.getClass())
+                return false;
+            BEntry<V> other = (BEntry<V>) obj;
+            if (index == null) {
+                if (other.index != null)
+                    return false;
+            } else if (!index.equals(other.index))
+                return false;
+            return true;
+        }
 	}
 }
