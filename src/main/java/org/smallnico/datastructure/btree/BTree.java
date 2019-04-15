@@ -32,20 +32,86 @@ public class BTree<V> {
 	public V remove(int index) {
 	    BEntry<V> target = search(root, index);
 	    if(target == null) return null;
-	    
-	    if(target.left == null && target.right == null) {
-	        target.group.entries.remove(target);
-	        if(target.group.isBlank()) {
-	        }
-	    }
-	    
-	    
-	    removeEntryAdjust(target);
+	    removeEntry(target);
 	    return target.value;
 	}
 	
-	public void removeEntryAdjust(BEntry<V> target) {
-	    
+	public void removeEntry(BEntry<V> target) {
+	    if(target.left == null) {
+	        target.group.entries.remove(target);
+	        if(target.group.isBlank()) root = null;
+	    }else {
+	        BNode<V> left = target.left;
+	        
+	        while(left.entries.getLast().right != null) {
+	            left = left.entries.getLast().right;
+	        }
+	        
+	        BEntry<V> replaced = left.entries.getLast();
+	        BEntry<V> lp = replaced.group.leftParentEntry();
+            BEntry<V> rp = replaced.group.rightParentEntry();
+            
+	        target.index = replaced.index;
+            target.value = replaced.value;
+	        removeEntryAdjust(replaced, lp, rp);
+	    }
+	}
+	
+	public void removeEntryAdjust(BEntry<V> target,  BEntry<V> lp, BEntry<V> rp) {
+	    if(target.group.entries.size() > 1) {
+	        target.group.entries.remove(target);
+	    }else {
+	       
+	        if(lp != null) {
+	            BNode<V> lpl = lp.left;
+	            BNode<V> lpg = lp.group;
+	            if(lpl.capacity() == 1) {
+	                lpl.entries.addLast(lp);
+	                if(rp != null) rp.left = lpl;
+	                lpg.entries.remove(lp);
+	                lp.group = lpl;
+	                if(lpg.isBlank()) {
+	                    lpg.entries = lpl.entries;
+	                    for(BEntry<V> e: lpl.entries) {
+	                        e.group = lpg;
+	                        e.left = null;
+	                        e.right = null;
+	                    }
+	                }
+	            }else {
+	                BEntry<V> r = lpl.entries.getLast();
+	                target.index = lp.index;
+	                target.value = lp.value;
+	                lp.index = r.index;
+	                lp.value = r.value;
+	                lpl.entries.remove(r);
+	            }
+	        }else {
+	            BNode<V> rpr = rp.right;
+                BNode<V> rpg = rp.group;
+                if(rpr.capacity() == 1) {
+                    rpr.entries.addFirst(rp);
+                    rpg.entries.remove(rp);
+                    rp.group = rpr;
+                    if(rpg.isBlank()) {
+                        rpg.entries = rpr.entries;
+                        for(BEntry<V> e: rpr.entries) {
+                            e.group = rpg;
+                            e.left = null;
+                            e.right = null;
+                        }
+                    }
+                }else {
+                    BEntry<V> r = rpr.entries.getFirst();
+                    target.index = rp.index;
+                    target.value = rp.value;
+                    rp.index = r.index;
+                    rp.value = r.value;
+                    rpr.entries.remove(r);
+                }
+	        }
+	        
+	    }
 	}
 	
 	protected BEntry<V> search(BNode<V> node, int index) {
@@ -67,6 +133,7 @@ public class BTree<V> {
 		
 		if(entries.isEmpty()) {
 			entries.add(inserted);
+			inserted.group = node;
 		}else {
 			BEntry<V> target = node.find(inserted.index);
 			if(target != null) {
@@ -78,6 +145,7 @@ public class BTree<V> {
 				int insertIndex = pos == node.limit ? pos : pos + 1; 
 				if(next == null) {
 					entries.add(insertIndex, inserted);
+					inserted.group = node;
 					insertEntryAdjust(node);
 				}else {
 					inserted = insertEntry(next, inserted);
@@ -125,6 +193,7 @@ public class BTree<V> {
 		if(l != null) {
 			l.right = entry.left;
 		}
+		entry.group = node;
 		return entry;
 	}
 	
@@ -147,6 +216,7 @@ public class BTree<V> {
 					entry.left.parentNode = splitEntity.left;
 				if(entry.right != null) 
 					entry.right.parentNode = splitEntity.left;
+				entry.group = splitEntity.left;
 				entryList.add(entry);
 			}else if(index == splitIndex) {
 				splitEntity.left.entries = entryList;
@@ -157,6 +227,7 @@ public class BTree<V> {
 					entry.left.parentNode = splitEntity.right;
 				if(entry.right != null) 
 					entry.right.parentNode = splitEntity.right;
+				entry.group = splitEntity.right;
 				entryList.add(entry);
 				splitEntity.right.entries = entryList;
 			}
@@ -201,14 +272,13 @@ public class BTree<V> {
 	public static class BNode<V> {
 		int limit;
 		BNode<V> parentNode;
-		BEntry<V> parentEntryLeft;
-		BEntry<V> parentEntryRight;
 		
 		LinkedList<BEntry<V>> entries;
 		
 		public BNode(int limit, BNode<V> parent, BEntry<V> entry) {
 			this(limit, parent);
 			entries.add(entry);
+			entry.group = this;
 		}
 		
 		public BNode(int limit, BNode<V> parent) {
@@ -220,6 +290,24 @@ public class BTree<V> {
 			this.parentNode = parentNode;
 			this.entries = entries;
 		}
+		
+		public BEntry<V> leftParentEntry(){
+		    int pos = this.parentNode.indexOf(this.entries.getFirst().index);
+		    if(pos == -1) {
+		        return null;
+		    }else {
+		        return this.parentNode.entries.get(pos);
+		    }
+		}
+		
+		public BEntry<V> rightParentEntry(){
+            int pos = this.parentNode.indexOf(this.entries.getFirst().index);
+            if(pos == this.parentNode.entries.size() - 1) {
+                return null;
+            }else {
+                return this.parentNode.entries.get(pos + 1);
+            }
+        }
 		
 		public boolean needAdjust() {
 			return capacity() > limit;
