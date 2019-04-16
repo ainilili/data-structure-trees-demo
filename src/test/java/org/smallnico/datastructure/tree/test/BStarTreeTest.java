@@ -1,14 +1,14 @@
 package org.smallnico.datastructure.tree.test;
 
 import org.junit.Test;
-import org.smallnico.datastructure.btree.BPlusTree;
+import org.smallnico.datastructure.btree.BStarTree;
 import org.smallnico.datastructure.btree.BTree;
 
-public class BPlusTreeTest {
+public class BStarTreeTest {
 
 	@Test
 	public void insertTest() {
-		BTree<Integer> btree = new BPlusTree<Integer>(20);
+		BTree<Integer> btree = new BStarTree<Integer>(10);
 		int count = 1000;
 		while(count -- > 0) {
 		    btree.put(count, count);

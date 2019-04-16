@@ -2,25 +2,11 @@ package org.smallnico.datastructure.btree;
 
 import java.util.LinkedList;
 
-public class BPlusTree<V> extends BTree<V>{
+public class BStarTree<V> extends BPlusTree<V>{
 
-    public BPlusTree(int limit) {
+    public BStarTree(int limit) {
         super(limit);
     }
-    
-    protected BEntry<V> search(BNode<V> node, int index) {
-	    if(node == null) return null;
-	    BEntry<V> result = node.find(index);
-        if(result != null && result.isLeaf()) {
-            return result;
-        }
-        int pos = node.indexOf(index) + 1;
-        if(pos < node.entries.size()) {
-            return search(node.entries.get(pos).left, index);
-        }else {
-            return search(node.entries.get(pos - 1).right, index);
-        }
-	}
     
     protected SplitEntity<V> split(BNode<V> node){
         final LinkedList<BEntry<V>> entries = node.entries;
@@ -63,9 +49,7 @@ public class BPlusTree<V> extends BTree<V>{
         middle.left = splitEntity.left;
         middle.right = splitEntity.right;
         
-        if(middle.left.entries.get(0).isLeaf()) {
-        	middle.left.rightNode = middle.right;
-        }
+        middle.left.rightNode = middle.right;
         return splitEntity;
     }
     
@@ -90,15 +74,11 @@ public class BPlusTree<V> extends BTree<V>{
         }
         if(r != null) {
             r.left = entry.right;
-            if(entry.right.entries.get(0).value != null) {
-            	entry.right.rightNode = r.right;
-            }
+            entry.right.rightNode = r.right;
         }
         if(l != null) {
             l.right = entry.left;
-            if(l.left.entries.get(0).value != null) {
-            	l.left.rightNode = entry.left;
-            }
+            l.left.rightNode = entry.left;
         }
         
         entry.group = node;
