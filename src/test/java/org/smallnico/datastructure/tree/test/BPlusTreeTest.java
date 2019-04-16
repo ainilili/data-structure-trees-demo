@@ -4,13 +4,14 @@ import java.util.Random;
 import java.util.Scanner;
 
 import org.junit.Test;
+import org.smallnico.datastructure.btree.BPlusTree;
 import org.smallnico.datastructure.btree.BTree;
 
-public class BTreeTest {
+public class BPlusTreeTest {
 
 	@Test
 	public void insertTest() {
-		BTree<Integer> btree = new BTree<Integer>(3);
+		BTree<Integer> btree = new BPlusTree<Integer>(3);
 		Random random = new Random();
 		int count = 20;
 		int s = 0;

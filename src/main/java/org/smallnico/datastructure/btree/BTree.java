@@ -6,9 +6,9 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 public class BTree<V> {
 
-	private int limit;
+	protected int limit;
 
-	private BNode<V> root;
+	protected BNode<V> root;
 	
 	public BTree(int limit){
 		this.limit = limit;
@@ -32,8 +32,9 @@ public class BTree<V> {
 	public V remove(int index) {
 	    BEntry<V> target = search(root, index);
 	    if(target == null) return null;
+	    V result = target.value;
 	    removeEntry(target);
-	    return target.value;
+	    return result;
 	}
 	
 	public void removeEntry(BEntry<V> target) {
@@ -172,17 +173,19 @@ public class BTree<V> {
 	
 	protected BEntry<V> addToEnties(BNode<V> node, BEntry<V> entry){
 		int pos = node.indexOf(entry.index);
+		final LinkedList<BEntry<V>> entries = node.entries;
+		
 		int insertIndex = pos == node.limit ? pos : pos + 1; 
 		
-		final LinkedList<BEntry<V>> entries = node.entries;
+		
 		entries.add(insertIndex, entry);
 		
 		BEntry<V> r = null;
 		BEntry<V> l = null;
 		if(insertIndex == 0) {
 			r = entries.get(1);
-		}else if(insertIndex == node.limit) {
-			l = entries.get(node.limit - 1);
+		}else if(insertIndex == entries.size() - 1) {
+			l = entries.get(insertIndex - 1);
 		}else {
 			r = entries.get(insertIndex + 1);
 			l = entries.get(insertIndex - 1);
