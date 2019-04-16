@@ -10,7 +10,7 @@ public class BTreeTest {
 
 	@Test
 	public void insertTest() {
-		BTree<Integer> btree = new BTree<Integer>(3);
+		BTree<Integer> btree = new BTree<Integer>(4);
 		Random random = new Random();
 		int count = 20;
 		int s = 0;

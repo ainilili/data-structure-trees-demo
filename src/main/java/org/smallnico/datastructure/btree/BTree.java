@@ -261,11 +261,14 @@ public class BTree<V> {
 				}
 			}
 			
+			boolean hasRightNode = cur.rightNode != null && ! cur.rightNode.entries.isEmpty();
+			String rightNode = hasRightNode ? "->" + cur.rightNode.entries.get(0).index + " ": " ";
+			
 			if(h == cur.height()) {
-				builder.append(cur.entries + " ");
+				builder.append(cur.entries + rightNode);
 			}else {
 				builder.append("\n");
-				builder.append(cur.entries + " ");
+				builder.append(cur.entries + rightNode);
 				h = cur.height();
 			}
 		}
@@ -276,7 +279,9 @@ public class BTree<V> {
 		int limit;
 		BNode<V> parentNode;
 		
+		BNode<V> rightNode; //B+Tree
 		LinkedList<BEntry<V>> entries;
+		
 		
 		public BNode(int limit, BNode<V> parent, BEntry<V> entry) {
 			this(limit, parent);
@@ -384,6 +389,10 @@ public class BTree<V> {
 			this.left = left;
 			return this;
 		}
+		
+		public boolean isLeaf() {
+		    return ! hasRight() && ! hasLeft();
+		}
 
 		public boolean hasRight() {
 			return right != null;
@@ -393,9 +402,13 @@ public class BTree<V> {
 			return left != null;
 		}
 
-		@Override
+        protected BEntry<V> copy() {
+            return new BEntry<V>(index, value, group);
+        }
+
+        @Override
 		public String toString() {
-			return String.valueOf(value);
+			return index + (value != null ? "-" + value : "");
 		}
 
         @Override
