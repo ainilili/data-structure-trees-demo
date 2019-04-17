@@ -2,6 +2,9 @@ package org.smallnico.datastructure.btree;
 
 import java.util.LinkedList;
 
+import org.smallnico.datastructure.btree.BTree.BEntry;
+import org.smallnico.datastructure.btree.BTree.BNode;
+
 public class BPlusTree<V> extends BTree<V>{
 
     public BPlusTree(int limit) {
@@ -48,8 +51,12 @@ public class BPlusTree<V> extends BTree<V>{
                 splitEntity.left.entries = entryList;
                 splitEntity.mid = middle;
                 entryList = new LinkedList<BEntry<V>>();
-                entryList.add(middle.copy());
-                middle.value = null;
+                if(middle.isLeaf()) {
+                    BEntry<V> c = middle.copy();
+                    entryList.add(c);
+                    c.group = splitEntity.right;
+                    middle.value = null;
+                }
             }else {
                 if(entry.left != null) 
                     entry.left.parentNode = splitEntity.right;
@@ -132,5 +139,101 @@ public class BPlusTree<V> extends BTree<V>{
         return inserted;
     }
     
+    public void removeEntry(BEntry<V> target) {
+        if(target.left == null) {
+            if(target.group.capacity() == 1) {
+                if(target.group.parentNode == null) {
+                    root = null;
+                }else {
+                    removeEntryAdjust(target, target.group.leftParentEntry(), target.group.rightParentEntry());    
+                }
+            }else {
+                BEntry<V> lp = target.group.leftParentEntry();
+                if(target.group.entries.getFirst().index == target.index && lp != null) {
+                    lp.index = target.group.entries.get(1).index;
+                }
+                target.group.entries.remove(target);
+            }
+        }else {
+            BNode<V> left = target.left;
+
+            while(left.entries.getLast().right != null) {
+                left = left.entries.getLast().right;
+            }
+
+            BEntry<V> replaced = left.entries.getLast();
+            BEntry<V> lp = replaced.group.leftParentEntry();
+            BEntry<V> rp = replaced.group.rightParentEntry();
+
+            target.index = replaced.index;
+            target.value = replaced.value;
+            removeEntryAdjust(replaced, lp, rp);
+        }
+    }
+    
+    public void removeEntryAdjust(BEntry<V> target,  BEntry<V> lp, BEntry<V> rp) {
+        if(target.group.entries.size() > 1) {
+            if(target.group.entries.getFirst().index == target.index && lp != null) {
+                lp.index = target.group.entries.get(1).index;
+            }
+            target.group.entries.remove(target);
+        }else {
+            if(lp != null) {
+                BNode<V> lpl = lp.left;
+                BNode<V> lpg = lp.group;
+                if(lpl.capacity() == 1) {
+                    lpl.entries.addLast(lp);
+                    if(rp != null) rp.left = lpl;
+                    lpg.entries.remove(lp);
+                    lp.group = lpl;
+                    if(lpg.isBlank()) {
+                        lpg.entries = lpl.entries;
+                        for(BEntry<V> e: lpl.entries) {
+                            e.group = lpg;
+                            e.left = null;
+                            e.right = null;
+                        }
+                    }
+                    if(lpg.parentNode != null) {
+                        removeSingleNodeAdjust(lpg);
+                    }
+                }else {
+                    BEntry<V> r = lpl.entries.getLast();
+                    target.index = lp.index;
+                    target.value = lp.value;
+                    lp.index = r.index;
+                    lp.value = r.value;
+                    lpl.entries.remove(r);
+                }
+            }else {
+                BNode<V> rpr = rp.right;
+                BNode<V> rpg = rp.group;
+                if(rpr.capacity() == 1) {
+                    rpr.entries.addFirst(rp);
+                    rpg.entries.remove(rp);
+                    rp.group = rpr;
+                    if(rpg.isBlank()) {
+                        rpg.entries = rpr.entries;
+                        for(BEntry<V> e: rpr.entries) {
+                            e.group = rpg;
+                            e.left = null;
+                            e.right = null;
+                        }
+                    }
+                    if(rpg.parentNode != null) {
+                        removeSingleNodeAdjust(rpg);
+                    }
+                }else {
+                    BEntry<V> r = rpr.entries.getFirst();
+                    target.index = rp.index;
+                    target.value = rp.value;
+                    rp.index = r.index;
+                    rp.value = r.value;
+                    rpr.entries.remove(r);
+                }
+            }
+
+        }
+    }
     
 }
